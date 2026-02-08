@@ -11,7 +11,11 @@ PURPOSE: This is the simplest possible p5.js sketch that demonstrates:
 4. Tile-based rendering (every cell = one rectangle)
 */
 
-const TS = 32; // TILE SIZE: pixels per grid cell (32x32 squares)
+const TS = 32; // TILE SIZE: pixels per grid cell (32x32 squaresS)
+
+// PLAYER (grid coordinates)
+let playerR = 1;
+let playerC = 1;
 
 /*
 GRID LEGEND (how numbers map to visuals):
@@ -53,9 +57,37 @@ const grid = [
   [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
 ];
 
+function isWalkable(r, c) {
+  // bounds check
+  if (r < 0 || r >= grid.length) return false;
+  if (c < 0 || c >= grid[0].length) return false;
+
+  // 0 = floor (walkable), 1 = wall (blocked)
+  return grid[r][c] === 0;
+}
+
+function tryMove(dr, dc) {
+  const nextR = playerR + dr;
+  const nextC = playerC + dc;
+
+  if (isWalkable(nextR, nextC)) {
+    playerR = nextR;
+    playerC = nextC;
+  }
+}
+
+// Optional: lets you hold keys to move smoothly
+function keyPressed() {
+  if (keyCode === LEFT_ARROW || key === "a" || key === "A") tryMove(0, -1);
+  if (keyCode === RIGHT_ARROW || key === "d" || key === "D") tryMove(0, 1);
+  if (keyCode === UP_ARROW || key === "w" || key === "W") tryMove(-1, 0);
+  if (keyCode === DOWN_ARROW || key === "s" || key === "S") tryMove(1, 0);
+}
+
 /*
 p5.js SETUP: Runs once when sketch loads
 */
+
 function setup() {
   // Canvas size = grid dimensions × tile size
   // grid[0].length = 16 columns, grid.length = 11 rows
@@ -100,10 +132,15 @@ function draw() {
       - x = column × TS    y = row × TS
       */
       rect(c * TS, r * TS, TS, TS);
+      // --- DRAW PLAYER (on top of tiles) ---
+      fill(255, 80, 80); // player color
+      const px = playerC * TS + TS / 2;
+      const py = playerR * TS + TS / 2;
+      circle(px, py, TS * 0.6);
     }
   }
 
   // UI LABEL: Explain what students are seeing
   fill(0); // Black text
-  text("Static array → grid render", 10, 16);
+  text("Arrow keys / WASD to move (0=floor, 1=wall)", 10, 16);
 }
